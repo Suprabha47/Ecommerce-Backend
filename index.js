@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+const dotenv = require("dotenv").config();
 const multer = require("multer");
 const path = require("path");
 
@@ -24,9 +24,7 @@ const storage = multer.diskStorage({
 
 // connecting with db
 mongoose
-  .connect(
-    "mongodb+srv://suprabhakumari2020:suprabha2020@basics.nttqyal.mongodb.net/?retryWrites=true&w=majority&appName=Basics"
-  )
+  .connect(process.env.MONGODB_CONNECT)
   .then(() => console.log("connected to database..."))
   .catch((err) => console.log(err));
 
