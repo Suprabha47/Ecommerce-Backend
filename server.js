@@ -189,7 +189,7 @@ app.post("/productImages", imageHandle.single("image"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded!" });
   res.status(200).json({
     message: "File uploaded!",
-    imageUrl: `http://localhost:3001/productImages/${req.file.filename}`,
+    imageUrl: `${process.env.BASE_URL}/productImages/${req.file.filename}`,
   });
 });
 
