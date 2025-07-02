@@ -4,36 +4,22 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv").config();
 const multer = require("multer");
 const path = require("path");
-const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const app = express();
 const port = 3001;
 
 app.use(express.json());
 app.use(cors());
+app.use("/productImages", express.static("images"));
 
 app.listen(port, () => console.log(`port initialized at ${port}...`));
 
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
-});
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: { folder: "product-images", allowed_formats: ["jpg", "jpeg", "png"] },
-});
-
-const upload = multer({ storage });
-
-app.post("/productImages", upload.single("image"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded!" });
-  res.status(200).json({
-    message: "File uploaded!",
-    imageUrl: req.file.path,
-  });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "images"),
+  filename: (req, file, cb) => {
+    const imageFileName = Date.now() + "-" + file.originalname;
+    cb(null, imageFileName);
+  },
 });
 
 // connecting with db
@@ -95,11 +81,12 @@ const ProductDataSchema = new Schema({
 const Product = model("products", ProductDataSchema);
 
 // to add a product
-app.post("/add-product", upload.single("image"), async (req, res) => {
+app.post("/add-product", async (req, res) => {
   const {
     productName,
     productDescription,
     price,
+    image,
     discountPrice,
     seoTitle,
     seoDescription,
@@ -116,7 +103,7 @@ app.post("/add-product", upload.single("image"), async (req, res) => {
       productName,
       productDescription,
       price,
-      image: req.file.path,
+      image,
       discountPrice,
       seoTitle,
       seoDescription,
@@ -168,13 +155,13 @@ app.post("/productsMulti", async (req, res) => {
 });
 
 // to update product data
-app.put("/edit-product", upload.single("image"), async (req, res) => {
+app.put("/edit-product", async (req, res) => {
   const { _id, p } = req.body;
 
   try {
-    if (req.file) p.image = req.file.path;
     const updated = await Product.findOneAndUpdate({ _id }, p);
     console.log("updated?: ", updated);
+    console.log("inside /edit-product!");
     if (!updated) return res.status(404).send("product not found");
     return res.status(200).json({ mgs: "product updated!", res: req.body });
   } catch (err) {
@@ -196,6 +183,19 @@ app.post("/product-details", async (req, res) => {
   }
 });
 
+const imageHandle = multer({ storage });
+
+app.post("/productImages", imageHandle.single("image"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded!" });
+  res.status(200).json({
+    message: "File uploaded!",
+    imageUrl: `${process.env.BASE_URL}/productImages/${req.file.filename}`,
+  });
+});
+
+app.get("/productImages/:fileName", (req, res) => {
+  const file = req.params.fileName;
+});
 app.use((error, req, res, next) =>
   res.status(500).send("Something went wrong!")
 );
