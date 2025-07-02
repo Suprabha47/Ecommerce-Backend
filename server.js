@@ -17,8 +17,7 @@ app.listen(port, () => console.log(`port initialized at ${port}...`));
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "images"),
   filename: (req, file, cb) => {
-    //const imageFileName = Date.now() + "-" + file.originalname;
-    const imageFileName = file.originalname;
+    const imageFileName = Date.now() + "-" + file.originalname;
     cb(null, imageFileName);
   },
 });
