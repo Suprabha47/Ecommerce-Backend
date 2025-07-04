@@ -14,14 +14,14 @@ exports.addProduct = async (req, res) => {
     return res.status(201).send(`Product ${productName} created!`);
   } catch (err) {
     console.log("Error occured while adding products!");
-    res.status(500).send(err);
+    res.status(500).json({ message: "Post method error", error: err });
   }
 };
 
 exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find();
-    if (!products)
+    if (products.length === 0)
       return res.status(404).json({ message: "No products added!" });
     return res.status(200).json(products);
   } catch (err) {
@@ -30,29 +30,37 @@ exports.getProducts = async (req, res) => {
 };
 
 exports.deleteProduct = async (req, res) => {
-  const _id = req.params.id;
+  const { id } = req.params;
   try {
-    const delProduct = await Product.deleteOne({ _id });
-    if (delProduct.deletedCount === 0)
-      return res.status(404).send("Product not found!");
+    const delProduct = await Product.findByIdAndDelete(id);
+    if (!delProduct) return res.status(404).send("Product not found!");
     return res
       .status(200)
       .json({ message: "Product Deleted!", result: delProduct });
   } catch (err) {
-    res.status(500).send(err);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error!", error: err.message });
   }
 };
 
 exports.updateProduct = async (req, res) => {
   const { _id, p } = req.body;
+  if (!_id || !p)
+    return res
+      .status(400)
+      .json({ message: "Missing product ID or update data." });
+
   try {
-    const updated = await Product.findOneAndUpdate({ _id }, p);
+    const updated = await Product.findOneAndUpdate({ _id }, p, { new: true });
     if (!updated) return res.status(404).send("Product not found!");
     return res
       .status(200)
-      .json({ message: "Product Updated!", result: req.body });
+      .json({ message: "Product Updated!", result: updated });
   } catch (err) {
-    res.status(500).send(err);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error.", error: err.message });
   }
 };
 

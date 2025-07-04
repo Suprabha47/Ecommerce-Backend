@@ -23,6 +23,7 @@ app.use("/productImages", express.static("images"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/upload", require("./routes/uploadRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
+app.use("/api/categories", require("./routes/categoryRoutes"));
 
 // global error handler (must be the last error handler)
 app.use((error, req, res, next) =>
