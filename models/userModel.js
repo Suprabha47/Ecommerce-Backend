@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 
 const UserDataSchema = new Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
+  firstName: { type: String },
+  lastName: { type: String },
   email: {
     type: String,
     required: true,
@@ -11,7 +11,9 @@ const UserDataSchema = new Schema({
     match: /^\S+@\S+\.\S+$/,
     trim: true,
   },
-  password: { type: String, required: true },
+  password: { type: String },
+  googleId: { type: String },
+  photoUrl: { type: String },
 });
 
 module.exports = model("User", UserDataSchema);

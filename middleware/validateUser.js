@@ -1,8 +1,8 @@
 const Joi = require("joi");
 
 const userSchema = Joi.object({
-  firstName: Joi.string().trim().required(),
-  lastName: Joi.string().trim().required(),
+  firstName: Joi.string().trim(),
+  lastName: Joi.string().trim(),
   email: Joi.string()
     .email({ tlds: { allow: false } }) // disables top-level domain checking like .com
     .required()
@@ -11,11 +11,13 @@ const userSchema = Joi.object({
       "any.required": "Email is required.",
     }),
 
-  password: Joi.string().min(6).max(30).required().messages({
+  password: Joi.string().min(6).max(30).messages({
     "string.min": "Password must be at least 6 characters.",
     "string.max": "Password can't be longer than 30 characters.",
     "any.required": "Password is required.",
   }),
+  googleId: Joi.string(),
+  photoUrl: Joi.string(),
 });
 
 module.exports = (req, res, next) => {
